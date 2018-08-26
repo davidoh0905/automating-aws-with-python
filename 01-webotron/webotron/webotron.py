@@ -20,14 +20,25 @@ import click
 
 from bucket import BucketManager
 
-SESSION=boto3.Session(profile_name='pythonAutomation')
-bucket_manager = BucketManager(SESSION) ## bucket manager will later hold S3 resource
-# S3=SESSION.resource('s3')
-
+# to make this available for all other functions, define them here
+session = None # session has to be configured after cli since options will only work once cli is working
+bucket_manager = None
 
 @click.group()
-def cli():
+@click.option('--profile', default=None,
+    help="Use a given AWS profile.")
+def cli(profile): # only when the group takes over
     """Webotron deploys websites to AWS."""
+    # profile name configuration. let user pass in the profile
+    global session, bucket_manager # to reset them here
+
+    session_cfg={} # dictionary
+    if profile:
+        session_cfg['profile_name'] = profile
+
+    session=boto3.Session(**session_cfg)  # glob? #profile_name='pythonAutomation'
+    bucket_manager = BucketManager(session) ## bucket manager will later hold S3 resource
+
     pass
 
 
